@@ -9,67 +9,64 @@
 # Also, a nice tutorial here:
 # http://thingsaaronmade.com/blog/a-quick-intro-to-writing-a-parser-using-treetop.html
 
-module Byr
-  grammar OfxGrammer do
+grammar OfxGrammer do
+  # The root of a parsed OFX response will be a single node, an Aggregate,
+  # with a tag of '<OFX>' and several children.
+  rule aggregate do
+    space?
+    tag
+    space?
+    children
+    space?
+    close_tag
+    space?
+    # This ensures that this rule matches only if the closing tag matches the
+    # opening tag
+    &{ |s| s[1].text_value.delete('</>') == s[5].text_value.delete('</>') }
+    <Aggregate>
+  end
 
-    # The root of a parsed OFX response will be a single node, an Aggregate,
-    # with a tag of '<OFX>' and several children.
-    rule aggregate do
-      space?
-      tag
-      space?
-      children
-      space?
-      close_tag
-      space?
-      # This ensures that this rule matches only if the closing tag matches the
-      # opening tag
-      &{ |s| s[1].text_value.delete('</>') == s[5].text_value.delete('</>') }
-      <Aggregate>
-    end
+  # Each Aggregate will have a Children node that will consist of zero or
+  # more Aggregates and zero or more Fields.
+  rule children do
+    child*
+    <Children>
+  end
 
-    # Each Aggregate will have a Children node that will consist of zero or
-    # more Aggregates and zero or more Fields.
-    rule children do
-      child*
-      <Children>
-    end
+  rule child do
+    aggregate / field
+    # field / aggregate
+  end
 
-    rule child do
-      aggregate / field
-      # field / aggregate
-    end
+  # A Field node will have a Tag node and a Value node.
+  rule field do
+    tag
+    space?
+    value # &{ |s| debugger || true }
+    space?
+    # In OFX version 1, the closing tag is optional; in version 2 it is
+    # mandatory.  The predicate ensures that this rule matches only if the
+    # closing tag is either blank or matches the opening tag
+    close_tag &{ |s| s[0].text_value.delete('</>') == s[4].text_value.delete('</>') }
+    <Field>
+  end
 
-    # A Field node will have a Tag node and a Value node.
-    rule field do
-      tag
-      space?
-      value # &{ |s| debugger || true }
-      space?
-      # In OFX version 1, the closing tag is optional; in version 2 it is
-      # mandatory.  The predicate ensures that this rule matches only if the
-      # closing tag is either blank or matches the opening tag
-      close_tag &{ |s| s[0].text_value.delete('</>') == s[4].text_value.delete('</>') }
-      <Field>
-    end
+  # '
+  rule tag do
+    '<' space? [.A-Z0-9]+ space? '>' # '
+    <Tag>
+  end
 
-    # '
-    rule tag do
-      '<' space? [.A-Z0-9]+ space? '>' # '
-      <Tag>
-    end
+  rule close_tag do
+    '</' space? [.A-Z0-9]+ space? '>'
+  end
 
-    rule close_tag do
-      '</' space? [.A-Z0-9]+ space? '>'
-    end
+  rule value do
+    [^<]+
+    <Value>
+  end
 
-    rule value do
-      [^<]+
-      <Value>
-    end
-
-    rule space do
-      [\s]+
-    end
+  rule space do
+    [\s]+
   end
 end
