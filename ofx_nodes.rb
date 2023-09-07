@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'htmlentities'
-
 module OfxGrammer
   class Node < Treetop::Runtime::SyntaxNode
     def name
