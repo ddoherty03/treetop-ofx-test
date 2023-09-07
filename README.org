@@ -1,9 +1,6 @@
 # treetop-ofx-test
 
-* Parsing OFX Responses with Treetop
-
-** Version 1xx versus 2xx
-The main differences in the two versions:
+* Version 1xx versus 2xx
 
 ** Headers
 1xx and 2xx uses different headers, which have been removed from the sample
@@ -29,12 +26,35 @@ In version 2xx, only the latter example should be valid.
 
 ** Issues with my Treetop Grammars
 
+*** Version 1xx
 I have been using the version 1xx grammar for many years successfully, but
 there is an issue with it: the grammar does not allow a closing tag on a value
 field, even though it is optional.  However, when I add an optional closing
 tag, the grammar breaks.  This has not been a problem in the wild since it
 appears that almost all financial institutions leave off the closing tag.
 
+*** Version 2xx
 Most financial institutions seem to still use the version 1xx syntax, but I
 have run across one that uses the v2xx syntax, and I want a grammar that
 parses those files was well.
+
+When I try a revised version of the grammar that makes the closing tag
+mandatory, however, the parser fails to parse an OFX2 response file.
+
+* Test Script
+This repository has a test script, =test-ofx.rb= that you should be able to
+run it after installing the =treetop= gem.
+
+As of this date, the version1 parsing succeeds (provided I don't make closing
+tags optional), but the version2 parsing fails.
+
+I'm asking for help from the mailing list to see if anyone can tell me where I
+am getting it wrong.
+
+* Issues
+
+1. On the version1 grammar, =ofx_v1.treetop=, why does it break if I uncomment
+ lines 51-52 to make the close-tag element optional?
+2. On the version2 grammar, =ofx_v2.treetop=, why is it choking on the test
+   script.  I suspect that it involves the close-tag element at line 52, but I
+   can't see what's wrong with it.
