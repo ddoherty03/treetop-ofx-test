@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-module OfxGrammer
+require 'debug'
+
+module OfxGrammar
   class Node < Treetop::Runtime::SyntaxNode
     def name
       elements[0].text_value.delete_prefix('<').delete_suffix('>')

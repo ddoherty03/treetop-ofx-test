@@ -9,7 +9,7 @@
 # Also, a nice tutorial here:
 # http://thingsaaronmade.com/blog/a-quick-intro-to-writing-a-parser-using-treetop.html
 
-grammar OfxGrammer do
+grammar OfxGrammar do
   # The root of a parsed OFX response will be a single node, an Aggregate,
   # with a tag of '<OFX>' and several children.
   rule aggregate do

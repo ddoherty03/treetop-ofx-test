@@ -15,7 +15,7 @@ module Ofx
       else
         raise ImplementationError, "OFX version `#{version}` not implemented"
       end
-      @parser = OfxGrammerParser.new
+      @parser = OfxGrammarParser.new
     end
 
     def parse(str)
