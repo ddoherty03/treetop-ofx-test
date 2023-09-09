@@ -12,53 +12,55 @@
 grammar OfxGrammar do
   # The root of a parsed OFX response will be a single node, an Aggregate,
   # with a tag of '<OFX>' and several children.
+
   rule aggregate do
     space*
-    tag
+    tag  # &{ |s| binding.break; true }
     space*
     children
     space*
     close_tag
-    space*
     # This ensures that this rule matches only if the closing tag matches the
     # opening tag
-    &{ |s| s[1].text_value.delete('</>') == s[5].text_value.delete('</>') }
+    &{ |s| s[1].tag_val == s[5].tag_val }
+    space*
     <Aggregate>
   end
 
   # Each Aggregate will have a Children node that will consist of zero or
   # more Aggregates and zero or more Fields.
   rule children do
-    child*
+    child ([\s]* child)*
     <Children>
   end
 
   rule child do
-    aggregate / field
-    # field / aggregate
+    # aggregate / field
+    (field / aggregate) # &{ |s| binding.break; true }
   end
 
   # A Field node will have a Tag node and a Value node.
   rule field do
-    tag
-    space?
-    value # &{ |s| debugger || true }
-    space?
+    # 0   1    2      3
+    tag [\s]* value? [\s]*
     # In OFX version 1, the closing tag is optional; in version 2 it is
     # mandatory.  The predicate ensures that this rule matches only if the
     # closing tag is either blank or matches the opening tag
-    close_tag &{ |s| s[0].text_value.delete('</>') == s[4].text_value.delete('</>') }
+    #   4
+    close_tag
+    &{ |s| s[0].tag_val == s[4].tag_val }
     <Field>
   end
 
   # '
   rule tag do
-    '<' space? [.A-Z0-9]+ space? '>' # '
+    '<' space* [.A-Z0-9]+ space* '>'
     <Tag>
   end
 
   rule close_tag do
-    '</' space? [.A-Z0-9]+ space? '>'
+    '</' space* [.A-Z0-9]+ space* '>'
+    <CloseTag>
   end
 
   rule value do
