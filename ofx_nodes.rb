@@ -17,6 +17,17 @@ module OfxGrammar
   end
 
   class Tag < Node
+    def tag_val
+      # The name of the tag is at index 2
+      elements[2].text_value
+    end
+  end
+
+  class CloseTag < Node
+    def tag_val
+      # The name of the tag is at index 2
+      elements[2].text_value
+    end
   end
 
   class Value < Node
